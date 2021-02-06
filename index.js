@@ -22,13 +22,13 @@ io.on('connection', (socket) => {
   	});
 	// 用户发送消息触发方法
   	socket.on('chat message', (data) => {
-    	console.log('message: ' + data);
+    	// console.log('message: ' + data);
 		// socket.broadcast.emit('chat message',data);
 		io.emit('chat message',data); 
   	});
 });
 
 
-http.listen(80, () => {
+http.listen(3000, () => {
   console.log('listening on *:3000');
 });
