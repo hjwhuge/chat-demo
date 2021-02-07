@@ -19,8 +19,31 @@
         width: 100%;
       }
       .chat{
+        display: none;
       }
-      .chat .container{height: 500px;}
+      .chat .container{
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      .chat .chat-container{
+        height: 100%;
+        padding:2vh 0;
+      }
+      .chat .chat-container .list{
+        border: 1px solid #ccc;
+        height: 100%;
+      }
+      .chat .chat-container .list-item{
+        list-style: none;
+      }
+      .chat .chat-container .list-item .list-item-name{
+        font-weight: 800;
+      }
+      
+      .chat .chat-input{
+        height: 54px;
+      }
       .chat .toast{
         width: 100%; 
         text-align: center;
@@ -74,15 +97,15 @@
     <div class="page">
       <div class="page chat">
         <div class="container">
-          <div class="row justify-content-start">
+          <div class="row chat-container">
             <div class="col">
-              <ul class="list-group"></ul>
+              <ul class="list"></ul>
             </div>
           </div>
-          <div class="row justify-content-end">
+          <div class="row chat-input">
             <div class="col">
               <div class="input-group mb-3">
-                <input id="input" type="text" class="form-control" placeholder="请输入内容" aria-label="Recipient's username" aria-describedby="button-addon2">
+                <input id="input" type="text" class="form-control" placeholder="请输入聊天内容" aria-label="Recipient's username" aria-describedby="button-addon2">
                 <div class="input-group-append">
                   <button class="btn btn-outline-secondary" type="button" id="button-addon2">发送</button>
                 </div>
@@ -123,9 +146,9 @@
       // console.log(nickname)
       if(event.which === 13) { 
           if (nickname) {
-            socket.emit('chat login', nickname);
-            window.sessionStorage.setItem('nickname', nickname);
+            socket.emit('add user', nickname);
             $(".login").css("display","none");
+            $(".chat").css("display","block");
           }
        }
     })
@@ -135,12 +158,7 @@
     $('#button-addon2').click(function(e) {
       e.preventDefault();
       if (input.value) {
-        let nickname = sessionStorage.getItem('nickname')
-        let data = {
-          nickname ,
-          msg: input.value
-        }
-        socket.emit('chat message', data);
+        socket.emit('new message', input.value);
         input.value = '';
       }
     });
@@ -150,12 +168,7 @@
         if(event.which === 13) { 
             if (input.value) {
               if (input.value) {
-                let nickname = sessionStorage.getItem('nickname')
-                let data = {
-                  nickname ,
-                  msg: input.value
-                }
-                socket.emit('chat message', data);
+                socket.emit('new message', input.value);
                 input.value = '';
               }
             }
@@ -163,11 +176,18 @@
     })
 
     // 接收新消息
-    socket.on('chat message', function(data) {
-      var item = document.createElement('li');
-      item.textContent = `${data.nickname}： ${data.msg}`;
-      item.className = 'list-group-item';
-      $('.list-group').append(item)
+    socket.on('new message', function(data) {
+      let template = `
+        <li class="list-item">
+          <span class="list-item-name" style="color:${data.usercolor}">${data.username}：</span>
+          <span>${data.msg}</span>
+        </li>
+      `
+      $('.list').append(template)
+      // var item = document.createElement('li');
+      // item.textContent = `${data.username}： ${data.msg}`;
+      // item.className = 'list-item';
+      // $('.list').append(item)
       // window.scrollTo(0, document.body.scrollHeight);
     });
 
@@ -176,6 +196,7 @@
       $('#toastMasseg').text(msg)
       $('.toast').toast('show');
     });
+
 
   </script>
 </html>
